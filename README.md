@@ -27,9 +27,9 @@ sudo apt install make
 <summary>What is make? What are Makefiles?</summary>
 <br>
 
-`make` is a tool that helps compile software. Central to `make`'s operation is the `Makefile`, a text file located in the project's directory. The `Makefile` contains compilation instructions for `make`, including optimization settings, debugging options, and where to install components such as executables, documentation, and configuration files. `make` has a lot of convenience features such as only recompiling parts of the program that have changed since the last build, system-specific instructions, etc. Our favorite resource on all things `Makefile`: https://makefiletutorial.com/
+`make` is a tool that helps compile software. Central to `make`'s operation is the `Makefile`, a text file located in the project's directory. The `Makefile` contains compilation instructions for `make`, including optimization settings, debugging options, and where to install components such as executables, documentation, and configuration files. `make` has a lot of convenience features such as only recompiling parts of the program that have changed since the last build, system-specific instructions, etc. My favorite resource on all things `Makefile` is at: https://makefiletutorial.com/
 
-We use `make` to compile nanoMPI
+Use `make` to compile nanoMPI
 
 </details>
 
@@ -176,7 +176,7 @@ Message Size (bytes)      Latency (us)         Bus BW (MB/s)        Validation
 
 ## Things To Be Aware Of
 
-The MPI standard allows MPI_Recv to partially fill the posted recvbuf if an incoming message matches the source, tag, and comm. Our implementation so far:
+The MPI standard allows MPI_Recv to partially fill the posted recvbuf if an incoming message matches the source, tag, and comm. The implementation so far:
 
 - Requires each MPI_Send and MPI_Recv to match the buffer size, otherwise there may be a hang.
 - Ignores the tag
@@ -191,7 +191,7 @@ These are todo items on the Roadmap.
 
 ## Roadmap
 
-We welcome contributions!
+Contributions are welcome! If you have something to add, open a PR!
 
 - [x] Basic launcher
 - [x] Socket implementation of point-to-point
