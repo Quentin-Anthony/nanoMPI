@@ -13,9 +13,9 @@ void nanompi_init_clock()
 
 double MPI_Wtime(void)
 {
-    struct timespec end;
-    clock_gettime(CLOCK_MONOTONIC, &end);
-    return (((long)end.tv_sec*1e9L - (long)start.tv_sec*1e9L) + end.tv_nsec - start.tv_nsec) / 1e9L;
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    return (double)(now.tv_sec - start.tv_sec) + (double)(now.tv_nsec - start.tv_nsec) / 1e9;
 }
 
 int MPI_Abort(MPI_Comm comm, int errorcode)
