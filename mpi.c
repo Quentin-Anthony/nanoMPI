@@ -38,7 +38,11 @@ int MPI_Finalize(void)
 // TODO: tags, generate a message envelope with match info so the recv side can match
 int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)
 {
+    if (tag != 0) {
+        PRINT_STDERR("Warning: nanoMPI does not support tags other than 0. Ignoring tag.\n");
+    }
     int status = MPI_SUCCESS;
+
     int rank = comm->my_rank;
     size_t msg_size = nanompi_get_msg_size(datatype, count);
     if (rank == dest) {
@@ -52,7 +56,11 @@ int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int ta
 // TODO: tags, MPI_ANY_SOURCE, matching with a variable (but lesser than) count that the user passed, etc.
 int MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *st)
 {
+    if (tag != 0) {
+        PRINT_STDERR("Warning: nanoMPI does not support tags other than 0. Ignoring tag.\n");
+    }
     int status = MPI_SUCCESS;
+
     size_t msg_size = nanompi_get_msg_size(datatype, count);
     int rank = comm->my_rank;
     if (rank == source) {

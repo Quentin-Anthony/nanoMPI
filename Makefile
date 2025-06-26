@@ -13,7 +13,7 @@ OBJECTS_C = $(SOURCES_C:.c=.o)
 all: libmpi.so mpirun benchmarks tests
 
 clean:
-	rm -f $(OBJECTS_C) $(OBJECTS_CPP) libmpi.so 
+	rm -f $(OBJECTS_C) $(OBJECTS_CPP) libmpi.so mpirun benchmarks/benchmark_allreduce tests/test_hello tests/test_pt2pt tests/test_bcast tests/test_reduce tests/test_allreduce tests/test_allreduce_ring tests/test_scatter_gather tests/test_alltoall tests/test_self tests/test_wtime tests/test_barrier 
 
 libmpi.so: $(OBJECTS_C) $(OBJECTS_CPP)
 	$(CXX) $(CPPFLAGS) $(OBJECTS_C) $(OBJECTS_CPP) -o $@ $(LDFLAGS)
