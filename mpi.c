@@ -15,6 +15,8 @@ int MPI_Init(int *argc, char ***argv)
     // For MPI_Wtime
     nanompi_init_clock();
 
+    PRINT_STDERR("Warning: nanoMPI does not yet support tag matching. See README.\n");
+
     status = nanompi_init_comm(&nanompi_comm_world, my_rank, world_size, hostfile);
     if (status) {
         PRINT_STDERR("Error in nanompi_init_comm\n");
@@ -38,9 +40,6 @@ int MPI_Finalize(void)
 // TODO: tags, generate a message envelope with match info so the recv side can match
 int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)
 {
-    if (tag != 0) {
-        PRINT_STDERR("Warning: nanoMPI does not support tags other than 0. Ignoring tag.\n");
-    }
     int status = MPI_SUCCESS;
 
     int rank = comm->my_rank;
@@ -56,9 +55,6 @@ int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int ta
 // TODO: tags, MPI_ANY_SOURCE, matching with a variable (but lesser than) count that the user passed, etc.
 int MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *st)
 {
-    if (tag != 0) {
-        PRINT_STDERR("Warning: nanoMPI does not support tags other than 0. Ignoring tag.\n");
-    }
     int status = MPI_SUCCESS;
 
     size_t msg_size = nanompi_get_msg_size(datatype, count);
