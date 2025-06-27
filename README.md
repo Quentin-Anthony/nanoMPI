@@ -1,4 +1,5 @@
 # nanoMPI
+By Quentin Anthony and Nick Sarkauskas
 
 A minimal MPI Implementation loosely based on OpenMPI. nanoMPI has a few usecases:
 
