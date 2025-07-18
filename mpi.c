@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "mpi.h"
+
 #include "util.h"
 #include "backends/socket/socket_backend.h"
 #include "backends/self/self_backend.h"
@@ -44,12 +45,19 @@ int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int ta
 {
     int status = MPI_SUCCESS;
 
+    char msg_envelope_buf[sizeof(nanompi_message_envelope) + (count * datatype.size )];
+    nanompi_message_envelope envelope = {
+	.sizeof_buffer = (count * datatype.size),
+	.tag = tag
+    };
+    memcpy((void*)msg_envelope_buf, (void*)&envelope, sizeof(nanompi_message_envelope));
+    memcpy((void *)((char*)msg_envelope_buf + sizeof(nanompi_message_envelope)), buf, count * datatype.size);
     int rank = comm->my_rank;
     size_t msg_size = nanompi_get_msg_size(datatype, count);
     if (rank == dest) {
         status = nanompi_self_send(buf, count, datatype, dest, tag, comm);
     } else {
-        status = nanompi_socket_send(buf, msg_size, dest, comm);
+        status = nanompi_socket_send(msg_envelope_buf, sizeof(nanompi_message_envelope) + (count *datatype.size) , dest, comm);
     }
     return status;
 }
@@ -58,12 +66,17 @@ int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int ta
 int MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *st)
 {
     int status = MPI_SUCCESS;
-
     size_t msg_size = nanompi_get_msg_size(datatype, count);
     int rank = comm->my_rank;
     if (rank == source) {
         status = nanompi_self_recv(buf, count, datatype, source, tag, comm);
-    } else {
+    }
+    else if(source == MPI_ANY_SOURCE)
+    {
+	int any_source = mpi_poll_source(comm);
+	status = nanompi_socket_recv(buf, msg_size, any_source, comm); 
+    }
+    else {
         status = nanompi_socket_recv(buf, msg_size, source, comm);
     }
     if(st) {

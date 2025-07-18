@@ -198,6 +198,8 @@ int nanompi_socket_send(const void *buffer, size_t msg_size, int to_rank, nanomp
 {
     int status = MPI_SUCCESS;
     size_t sent_bytes = 0;
+    
+    
 
     while (sent_bytes != msg_size) {
         sent_bytes += send(comm->socket_info.client_fds[to_rank], buffer + sent_bytes, msg_size - sent_bytes, 0);
@@ -210,10 +212,18 @@ int nanompi_socket_recv(void *buffer, size_t msg_size, int from_rank, nanompi_co
 {
     int status = MPI_SUCCESS;
     size_t recv_bytes = 0;
-
-    while (recv_bytes != msg_size) {
+    nanompi_message_envelope message_envelope; 
+/*    while (recv_bytes != msg_size) {
         recv_bytes += recv(comm->socket_info.client_fds[from_rank], buffer + recv_bytes, msg_size - recv_bytes, 0);
-    }
+	if(recv_bytes > sizeof())
+    }*/
+    while (recv_bytes != sizeof(nanompi_message_envelope))
+	    recv_bytes += recv(comm->socket_info.client_fds[from_rank], (char*)&message_envelope+ recv_bytes, sizeof(nanompi_message_envelope) - recv_bytes, 0);
+    recv_bytes = 0;
+    while(recv_bytes != message_envelope.sizeof_buffer)
+    {
+        recv_bytes += recv(comm->socket_info.client_fds[from_rank], buffer + recv_bytes, message_envelope.sizeof_buffer - recv_bytes, 0);
 
+    }
     return status;
 }

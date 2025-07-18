@@ -15,6 +15,13 @@ typedef struct nanompi_socket_info_t {
     int server_fd; // One socket for the server
     int *client_fds; // To greater ranks, this is the fd returned by socket(). To lesser ranks, this is the handle returned by accept()
 } nanompi_socket_info_t;
+typedef struct nanompi_message_envelope {
+	size_t sizeof_buffer;
+	int tag; 
+	//need to add communicator 
+	//is destination really needed in this 
+
+} nanompi_message_envelope; 
 
 int nanompi_init_socket_backend(nanompi_communicator_t *comm);
 int nanompi_free_socket_backend(nanompi_communicator_t *comm);
