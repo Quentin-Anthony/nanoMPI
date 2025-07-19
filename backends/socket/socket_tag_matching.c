@@ -1,7 +1,7 @@
-#include "tag_matching.h"
+#include "socket_tag_matching.h"
 #include <sys/ioctl.h>
 #include "util.h"
-static struct pollfd * mpi_poll_fd(MPI_Comm comm, int size)
+struct pollfd * mpi_poll_fd_init(MPI_Comm comm, int size)
 {
 	static struct pollfd * fds = NULL;
 	if(fds == NULL){
@@ -18,7 +18,7 @@ int mpi_poll_source(MPI_Comm comm)
 {
 	int size =0;
 	MPI_Comm_size(comm, &size);
-	struct pollfd * fds = mpi_poll_fd(comm,size);
+	struct pollfd * fds = mpi_poll_fd_init(comm,size);
 	while(1)
 	{
 	if(poll(fds, size, -1) ==-1)

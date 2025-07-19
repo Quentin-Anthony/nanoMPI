@@ -7,8 +7,8 @@ CPPFLAGS = -g -fPIC -O0 -I.
 LDFLAGS = -shared
 
 # Source files
-SOURCES_C = mpi.c comm.c group.c proc.c op.c dtype.c util.c tag_matching.c \
-            backends/socket/socket_backend.c \
+SOURCES_C = mpi.c comm.c group.c proc.c op.c dtype.c util.c \
+            backends/socket/socket_backend.c backends/socket/socket_tag_matching.c \
             colls/colls.c colls/allgather/allgather.c colls/allgatherv/allgatherv.c \
             colls/allreduce/allreduce.c colls/alltoall/alltoall.c colls/bcast/bcast.c \
             colls/gather/gather.c colls/reduce/reduce.c colls/reduce_scatter/reduce_scatter.c \

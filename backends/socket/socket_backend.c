@@ -9,6 +9,7 @@
 #include <errno.h>
 
 #include "socket_backend.h"
+#include "socket_tag_matching.h"
 #include "constants.h"
 
 #include "util.h"
@@ -184,6 +185,8 @@ int nanompi_free_socket_backend(nanompi_communicator_t *comm)
     int rank = comm->my_rank;
     int i;
 
+
+    free(mpi_poll_fd_init(comm, 0));
     for (i = 0; i < size; i++) {
         close(comm->socket_info.client_fds[i]);
     }
@@ -213,10 +216,6 @@ int nanompi_socket_recv(void *buffer, size_t msg_size, int from_rank, nanompi_co
     int status = MPI_SUCCESS;
     size_t recv_bytes = 0;
     nanompi_message_envelope message_envelope; 
-/*    while (recv_bytes != msg_size) {
-        recv_bytes += recv(comm->socket_info.client_fds[from_rank], buffer + recv_bytes, msg_size - recv_bytes, 0);
-	if(recv_bytes > sizeof())
-    }*/
     while (recv_bytes != sizeof(nanompi_message_envelope))
 	    recv_bytes += recv(comm->socket_info.client_fds[from_rank], (char*)&message_envelope+ recv_bytes, sizeof(nanompi_message_envelope) - recv_bytes, 0);
     recv_bytes = 0;
