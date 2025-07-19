@@ -15,6 +15,7 @@
 #include "util.h"
 #include "comm.h"
 
+
 static int init_server(nanompi_communicator_t *comm)
 {
     struct sockaddr_in address;
@@ -156,37 +157,25 @@ int nanompi_init_socket_backend(nanompi_communicator_t *comm)
     if (!comm->socket_info.client_fds) {
         PRINT_STDERR("Error mallocing client fds\n");
         status = MPI_ERR_OTHER;
-        goto exit;
-    }
-
-    // Initialize poll structs for tag matching
-    status = mpi_poll_fd_init_backend(comm);
-    if (status != MPI_SUCCESS) {
-        PRINT_STDERR("Error initializing poll structures\n");
-        goto free_client_fds;
     }
 
     status = init_clients(comm);
     if (status) {
         PRINT_STDERR("Error in init_clients\n");
-        goto cleanup_poll;
+        goto free;
     }
-    
     status = init_server(comm);
     if (status) {
         PRINT_STDERR("Error in init_server\n");
-        goto cleanup_poll;
+        goto free;
     }
 
-    goto exit;
-
-cleanup_poll:
-    mpi_poll_fd_cleanup_backend(comm);
-free_client_fds:
-    free(comm->socket_info.client_fds);
-    comm->socket_info.client_fds = NULL;
 exit:
     return status;
+free:
+    free(comm->socket_info.client_fds);
+    comm->socket_info.client_fds = NULL;
+    goto exit;
 }
 
 int nanompi_free_socket_backend(nanompi_communicator_t *comm)
@@ -196,22 +185,14 @@ int nanompi_free_socket_backend(nanompi_communicator_t *comm)
     int rank = comm->my_rank;
     int i;
 
-    // Clean up poll structs
-    mpi_poll_fd_cleanup_backend(comm);
 
-    // Close all client file descriptors
+    free(mpi_poll_fd_init(comm, 0));
     for (i = 0; i < size; i++) {
-        if (comm->socket_info.client_fds[i] >= 0) {
-            close(comm->socket_info.client_fds[i]);
-        }
+        close(comm->socket_info.client_fds[i]);
     }
     free(comm->socket_info.client_fds);
-    comm->socket_info.client_fds = NULL;
 
-    // Close server file descriptor
-    if (comm->socket_info.server_fd >= 0) {
-        close(comm->socket_info.server_fd);
-    }
+    close(comm->socket_info.server_fd);
 
     return status;
 }
@@ -220,16 +201,11 @@ int nanompi_socket_send(const void *buffer, size_t msg_size, int to_rank, nanomp
 {
     int status = MPI_SUCCESS;
     size_t sent_bytes = 0;
-    ssize_t bytes_sent;
+    
+    
 
     while (sent_bytes != msg_size) {
-        bytes_sent = send(comm->socket_info.client_fds[to_rank], buffer + sent_bytes, msg_size - sent_bytes, 0);
-        if (bytes_sent < 0) {
-            perror("send failed");
-            status = MPI_ERR_OTHER;
-            break;
-        }
-        sent_bytes += bytes_sent;
+        sent_bytes += send(comm->socket_info.client_fds[to_rank], buffer + sent_bytes, msg_size - sent_bytes, 0);
     }
 
     return status;
@@ -239,42 +215,14 @@ int nanompi_socket_recv(void *buffer, size_t msg_size, int from_rank, nanompi_co
 {
     int status = MPI_SUCCESS;
     size_t recv_bytes = 0;
-    ssize_t bytes_received;
-    nanompi_message_envelope message_envelope;
-
-    // First receive the message envelope
+    nanompi_message_envelope message_envelope; 
+    while (recv_bytes != sizeof(nanompi_message_envelope))
+	    recv_bytes += recv(comm->socket_info.client_fds[from_rank], (char*)&message_envelope+ recv_bytes, sizeof(nanompi_message_envelope) - recv_bytes, 0);
     recv_bytes = 0;
-    while (recv_bytes != sizeof(nanompi_message_envelope)) {
-        bytes_received = recv(comm->socket_info.client_fds[from_rank], 
-                            (char*)&message_envelope + recv_bytes, 
-                            sizeof(nanompi_message_envelope) - recv_bytes, 0);
-        if (bytes_received < 0) {
-            perror("recv envelope failed");
-            status = MPI_ERR_OTHER;
-            goto exit;
-        }
-        recv_bytes += bytes_received;
-    }
+    while(recv_bytes != message_envelope.sizeof_buffer)
+    {
+        recv_bytes += recv(comm->socket_info.client_fds[from_rank], buffer + recv_bytes, message_envelope.sizeof_buffer - recv_bytes, 0);
 
-    // Validate the envelope
-    if (message_envelope.sizeof_buffer != msg_size) {
-        PRINT_STDERR("Message size mismatch: expected %zu, got %zu\n", msg_size, message_envelope.sizeof_buffer);
-        status = MPI_ERR_OTHER;
-        goto exit;
     }
-
-    // Now receive the actual message payload
-    recv_bytes = 0;
-    while (recv_bytes != msg_size) {
-        bytes_received = recv(comm->socket_info.client_fds[from_rank], buffer + recv_bytes, msg_size - recv_bytes, 0);
-        if (bytes_received < 0) {
-            perror("recv payload failed");
-            status = MPI_ERR_OTHER;
-            break;
-        }
-        recv_bytes += bytes_received;
-    }
-
-exit:
     return status;
 }
