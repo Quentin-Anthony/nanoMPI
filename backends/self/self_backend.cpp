@@ -16,7 +16,7 @@ public:
     void *libbuf;
     int count;
     MPI_Datatype datatype;
-    int tag; // TODO: handle tag, just change map to <pair<tag, comm>, vector<Send*>>
+    int tag;
 
     Send(const void *userbuf, int count, MPI_Datatype datatype, int tag, MPI_Comm comm) : userbuf(userbuf), count(count), datatype(datatype), tag(tag) {
         size_t msg_size = count * nanompi_get_dtype_size(datatype);
