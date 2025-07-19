@@ -16,10 +16,6 @@ int MPI_Init(int *argc, char ***argv)
     // For MPI_Wtime
     nanompi_init_clock();
 
-    if (my_rank == 0) {
-        PRINT_STDERR("Warning: nanoMPI does not yet support tag matching. See README.\n");
-    }
-
     status = nanompi_init_comm(&nanompi_comm_world, my_rank, world_size, hostfile);
     if (status) {
         PRINT_STDERR("Error in nanompi_init_comm\n");
