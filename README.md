@@ -198,8 +198,8 @@ Contributions are welcome! If you have something to add, open a PR!
 - [x] Socket implementation of point-to-point
 - [x] Basic Collectives
 - [x] Collective algos
-- [ ] Implement tag matching
-- [ ] Allow MPI_Recv to match with a send smaller than the recvbuf size
+- [x] Implement tag matching
+- [x] Allow MPI_Recv to match with a send smaller than the recvbuf size
 - [ ] InfiniBand implementation of point-to-point
 - [ ] Basic benchmarks
     - [ ] Collectives
