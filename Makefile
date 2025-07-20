@@ -23,7 +23,7 @@ OBJECTS_CPP = $(SOURCES_CPP:.cpp=.o)
 # Test executables
 TEST_TARGETS = tests/test_hello tests/test_pt2pt tests/test_bcast tests/test_reduce \
                tests/test_allreduce tests/test_allreduce_ring tests/test_scatter_gather \
-               tests/test_alltoall tests/test_self tests/test_wtime tests/test_barrier tests/test_all
+               tests/test_alltoall tests/test_self tests/test_wtime tests/test_barrier
 
 # Benchmark executables
 BENCHMARK_TARGETS = benchmarks/benchmark_allreduce
@@ -54,9 +54,7 @@ tests: $(TEST_TARGETS)
 tests/test_%: tests/test_%.c libmpi.so
 	$(CC) -g -o $@ $< -L. -I. -lmpi
 
-
 # Formatting
-
 FMT_SRCS := $(SOURCES_C) $(SOURCES_CPP) $(wildcard tests/*.c)
 
 .PHONY: format check-format tidy
