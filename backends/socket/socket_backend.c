@@ -186,7 +186,8 @@ int nanompi_free_socket_backend(nanompi_communicator_t *comm)
     int i;
 
 
-    free(mpi_poll_fd_init(comm, 0));
+    // release poll‑fd array used for MPI_ANY_SOURCE
+    mpi_poll_fd_destroy();
     for (i = 0; i < size; i++) {
         close(comm->socket_info.client_fds[i]);
     }

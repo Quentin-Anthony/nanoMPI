@@ -1,17 +1,30 @@
 #include "socket_tag_matching.h"
 #include <sys/ioctl.h>
 #include "util.h"
-struct pollfd * mpi_poll_fd_init(MPI_Comm comm, int size)
+
+static struct pollfd *fds = NULL;
+
+struct pollfd *mpi_poll_fd_init(MPI_Comm comm, int size)
 {
-	static struct pollfd * fds = NULL;
-	if(fds == NULL){
-	fds = calloc(size, sizeof(struct pollfd));
-	for(size_t i=0; i<size; i++ ){
-		fds[i].fd = comm->socket_info.client_fds[i];
-		fds[i].events = POLLIN; 
-	}
-	}
-	return fds;
+    if (fds == NULL && size > 0) {
+        fds = calloc(size, sizeof(struct pollfd));
+        if (!fds) {
+            PRINT_STDERR("calloc failed in mpi_poll_fd_init\n");
+            return NULL;
+        }
+        for (size_t i = 0; i < (size_t)size; ++i) {
+            fds[i].fd     = comm->socket_info.client_fds[i];
+            fds[i].events = POLLIN;
+        }
+    }
+    return fds;
+}
+
+// Free and null‑out the static pointer so later calls are safe
+void mpi_poll_fd_destroy(void)
+{
+    free(fds);
+    fds = NULL;
 }
 
 int mpi_poll_source(MPI_Comm comm)

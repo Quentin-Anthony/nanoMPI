@@ -1,7 +1,5 @@
 #include <string.h>
-
 #include "mpi.h"
-
 #include "util.h"
 #include "backends/socket/socket_backend.h"
 #include "backends/self/self_backend.h"

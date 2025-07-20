@@ -12,6 +12,7 @@ typedef struct nanompi_message_envelope {
 } nanompi_message_envelope; 
 struct pollfd * mpi_poll_fd_init(MPI_Comm comm, int size);
 int mpi_poll_source(MPI_Comm comm);
+void mpi_poll_fd_destroy(void);
 
 
 #endif 
