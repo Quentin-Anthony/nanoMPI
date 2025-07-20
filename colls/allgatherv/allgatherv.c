@@ -4,16 +4,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-int MPI_Allgatherv_basic(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
-                   void *recvbuf, const int *recvcounts, const int *displs,
-                   MPI_Datatype recvtype, MPI_Comm comm)
-{
+int MPI_Allgatherv_basic(const void *sendbuf, int sendcount, MPI_Datatype sendtype, void *recvbuf,
+                         const int *recvcounts, const int *displs, MPI_Datatype recvtype,
+                         MPI_Comm comm) {
     int rank, size;
     MPI_Comm_rank(comm, &rank);
     MPI_Comm_size(comm, &size);
 
     // First, gather all data to root (rank 0)
-    //MPI_Gather(sendbuf, sendcount, sendtype, recvbuf, recvcounts, recvtype, 0, comm); // recvcounts incorrect here
+    // MPI_Gather(sendbuf, sendcount, sendtype, recvbuf, recvcounts, recvtype, 0, comm); //
+    // recvcounts incorrect here
 
     // Then, broadcast the gathered data to all processes
     int total_recv_count = 0;
@@ -29,8 +29,8 @@ int MPI_Allgatherv_basic(const void *sendbuf, int sendcount, MPI_Datatype sendty
         memcpy(temp_buf, recvbuf, total_recv_count * nanompi_get_dtype_size(recvtype));
 
         for (int i = 0; i < size; i++) {
-            memcpy((char*)recvbuf + displs[i] * nanompi_get_dtype_size(recvtype),
-                   (char*)temp_buf + (displs[i] * nanompi_get_dtype_size(recvtype)),
+            memcpy((char *)recvbuf + displs[i] * nanompi_get_dtype_size(recvtype),
+                   (char *)temp_buf + (displs[i] * nanompi_get_dtype_size(recvtype)),
                    recvcounts[i] * nanompi_get_dtype_size(recvtype));
         }
 

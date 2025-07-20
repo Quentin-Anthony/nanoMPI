@@ -1,8 +1,8 @@
-#include <unistd.h>
 #include "mpi.h"
 #include "util.h"
+#include <unistd.h>
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     int rank;
 
     MPI_Init(&argc, &argv);

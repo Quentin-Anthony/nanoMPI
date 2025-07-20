@@ -1,9 +1,9 @@
-#include "util.h"
 #include "mpi.h"
+#include "util.h"
 
 #define ARRAY_SIZE 16
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     MPI_Init(&argc, &argv);
 
     int rank, size;
@@ -23,7 +23,8 @@ int main(int argc, char** argv) {
     }
     PRINT_STDOUT("\n");
 
-    MPI_Alltoall(send_data, ARRAY_SIZE / size, MPI_INT, recv_data, ARRAY_SIZE / size, MPI_INT, MPI_COMM_WORLD);
+    MPI_Alltoall(send_data, ARRAY_SIZE / size, MPI_INT, recv_data, ARRAY_SIZE / size, MPI_INT,
+                 MPI_COMM_WORLD);
 
     PRINT_STDOUT("Rank %d: Received data: ", rank);
     for (int i = 0; i < ARRAY_SIZE; i++) {

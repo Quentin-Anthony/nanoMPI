@@ -1,9 +1,9 @@
-#include "util.h"
 #include "mpi.h"
+#include "util.h"
 
 #define ARRAY_SIZE 5
 
-int main(int argc, char** argv) {
+int main(int argc, char **argv) {
     MPI_Init(&argc, &argv);
 
     int rank, size;
