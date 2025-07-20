@@ -48,7 +48,6 @@ int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int ta
         .tag            = tag
     };
     int rank = comm->my_rank;
-    size_t msg_size = nanompi_get_msg_size(datatype, count);
     if (rank == dest) {
         status = nanompi_self_send(buf, count, datatype, dest, tag, comm);
     } else {
