@@ -1,0 +1,19 @@
+# .clang-tidy
+Checks: >
+  -*
+  ,bugprone-*
+  ,clang-analyzer-*
+  ,cppcoreguidelines-slicing
+  ,modernize-use-equals-default
+  ,modernize-use-equals-delete
+  ,modernize-use-nodiscard
+  ,modernize-use-nullptr
+  ,performance-*
+  ,portability-*
+  ,readability-*
+  ,-readability-magic-numbers
+  ,-cppcoreguidelines-pro-bounds-pointer-arithmetic
+  ,-hicpp-vararg
+
+WarningsAsErrors: '*'
+HeaderFilterRegex: '.*'

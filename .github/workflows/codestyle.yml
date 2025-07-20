@@ -1,0 +1,39 @@
+name: Code Style Check
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  style-check:
+    name: Clang Format & Tidy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-15 clang-tidy-15 clang-format-15 bear
+
+      - name: Generate compilation database
+        run: |
+          # Use bear to intercept the build process and create a compile_commands.json file.
+          # We override CC and CXX to ensure clang is used.
+          bear -- make CC=clang-15 CXX=clang++-15 all
+
+      - name: Run clang-format check
+        run: |
+          # Check formatting for all C/C++/Header files tracked by git.
+          # --dry-run and -Werror cause a failure if any file is not formatted correctly.
+          clang-format-15 --dry-run -Werror $(git ls-files '**.c' '**.cpp' '**.h')
+
+      - name: Run clang-tidy check
+        run: |
+          # Run clang-tidy on all C/C++ source files using the compilation database.
+          # It automatically finds the .clang-tidy configuration file.
+          clang-tidy-15 -p=. $(git ls-files '**.c' '**.cpp')
