@@ -14,13 +14,10 @@ jobs:
     - name: Install clang tools
       run: |
         sudo apt-get update
-        sudo apt-get install -y clang-16 clang-tidy-16 clang-format-16 bear
-        sudo update-alternatives --install /usr/bin/clang-format  clang-format  /usr/bin/clang-format-16 100
-        sudo update-alternatives --install /usr/bin/clang-tidy    clang-tidy    /usr/bin/clang-tidy-16   100
-        sudo update-alternatives --install /usr/bin/run-clang-tidy run-clang-tidy /usr/bin/run-clang-tidy-16 100
+        sudo apt-get install -y clang clang-tools bear
 
-    - name: Check clang‑format
+    - name: Check clang-format
       run: make check-format
 
-    - name: Run clang‑tidy
+    - name: Run clang-tidy
       run: make tidy
