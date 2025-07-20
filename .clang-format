@@ -1,12 +1,7 @@
-# .clang-format
 BasedOnStyle: LLVM
-Language: Cpp
-IndentWidth: 4
-UseTab: Never
-BreakBeforeBraces: Allman
-ColumnLimit: 120
-PointerAlignment: Right
-SortIncludes: false
-AllowShortFunctionsOnASingleLine: None
+IndentWidth:   4
+ColumnLimit:   100
 AllowShortIfStatementsOnASingleLine: false
-AllowShortLoopsOnASingleLine: false
+FixNamespaceComments: true
+SortIncludes:  true
+IncludeBlocks: Preserve

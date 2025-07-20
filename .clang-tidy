@@ -1,19 +1,8 @@
-# .clang-tidy
 Checks: >
-  -*
-  ,bugprone-*
-  ,clang-analyzer-*
-  ,cppcoreguidelines-slicing
-  ,modernize-use-equals-default
-  ,modernize-use-equals-delete
-  ,modernize-use-nodiscard
-  ,modernize-use-nullptr
-  ,performance-*
-  ,portability-*
-  ,readability-*
-  ,-readability-magic-numbers
-  ,-cppcoreguidelines-pro-bounds-pointer-arithmetic
-  ,-hicpp-vararg
-
-WarningsAsErrors: '*'
+  bugprone-*,performance-*,readability-*,portability-*,
+  modernize-*,clang-analyzer-*,
+  -modernize-use-trailing-return-type       # example of disabling a noisy check
+WarningsAsErrors: >
+  bugprone-*,clang-analyzer-*
 HeaderFilterRegex: '.*'
+FormatStyle: file

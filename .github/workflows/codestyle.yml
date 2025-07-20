@@ -1,39 +1,26 @@
-name: Code Style Check
+name: Code-style
 
 on:
-  push:
-    branches: [ "main", "master" ]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ main ]
 
 jobs:
-  style-check:
-    name: Clang Format & Tidy
-    runs-on: ubuntu-latest
-
+  style:
+    runs-on: ubuntu-22.04
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout
+      uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang-15 clang-tidy-15 clang-format-15 bear
+    - name: Install clang tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-16 clang-tidy-16 clang-format-16 bear
+        sudo update-alternatives --install /usr/bin/clang-format  clang-format  /usr/bin/clang-format-16 100
+        sudo update-alternatives --install /usr/bin/clang-tidy    clang-tidy    /usr/bin/clang-tidy-16   100
+        sudo update-alternatives --install /usr/bin/run-clang-tidy run-clang-tidy /usr/bin/run-clang-tidy-16 100
 
-      - name: Generate compilation database
-        run: |
-          # Use bear to intercept the build process and create a compile_commands.json file.
-          # We override CC and CXX to ensure clang is used.
-          bear -- make CC=clang-15 CXX=clang++-15 all
+    - name: Check clang‑format
+      run: make check-format
 
-      - name: Run clang-format check
-        run: |
-          # Check formatting for all C/C++/Header files tracked by git.
-          # --dry-run and -Werror cause a failure if any file is not formatted correctly.
-          clang-format-15 --dry-run -Werror $(git ls-files '**.c' '**.cpp' '**.h')
-
-      - name: Run clang-tidy check
-        run: |
-          # Run clang-tidy on all C/C++ source files using the compilation database.
-          # It automatically finds the .clang-tidy configuration file.
-          clang-tidy-15 -p=. $(git ls-files '**.c' '**.cpp')
+    - name: Run clang‑tidy
+      run: make tidy
