@@ -5,8 +5,8 @@
 #include "constants.h"
 
 typedef struct nanompi_proc_t {
-    char hostname[MAX_HOSTNAME_LENGTH];
-    int port;
+  char hostname[MAX_HOSTNAME_LENGTH];
+  int port;
 } nanompi_proc_t;
 
 #endif
