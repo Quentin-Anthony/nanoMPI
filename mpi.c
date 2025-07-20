@@ -42,8 +42,9 @@ int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int ta
     int status = MPI_SUCCESS;
 
     // Send envelope first, then user buffer
+    size_t msg_size = nanompi_get_msg_size(datatype, count);
     nanompi_message_envelope envelope = {
-        .sizeof_buffer = msg_size,  /* msg_size == count * datatype.size */
+        .sizeof_buffer = msg_size,
         .tag            = tag
     };
     int rank = comm->my_rank;
@@ -57,6 +58,7 @@ int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int ta
         if (status == MPI_SUCCESS) {
             status = nanompi_socket_send(buf, msg_size, dest, comm);
         }
+    }
     return status;
 }
 
