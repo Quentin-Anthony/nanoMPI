@@ -23,7 +23,7 @@ OBJECTS_CPP = $(SOURCES_CPP:.cpp=.o)
 # Test executables
 TEST_TARGETS = tests/test_hello tests/test_pt2pt tests/test_bcast tests/test_reduce \
                tests/test_allreduce tests/test_allreduce_ring tests/test_scatter_gather \
-               tests/test_alltoall tests/test_self tests/test_wtime tests/test_barrier
+               tests/test_alltoall tests/test_self tests/test_wtime tests/test_barrier tests/test_all
 
 # Benchmark executables
 BENCHMARK_TARGETS = benchmarks/benchmark_allreduce
