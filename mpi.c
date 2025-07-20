@@ -41,20 +41,22 @@ int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int ta
 {
     int status = MPI_SUCCESS;
 
-    char msg_envelope_buf[sizeof(nanompi_message_envelope) + (count * datatype.size )];
+    // Send envelope first, then user buffer
     nanompi_message_envelope envelope = {
-	.sizeof_buffer = (count * datatype.size),
-	.tag = tag
+        .sizeof_buffer = msg_size,  /* msg_size == count * datatype.size */
+        .tag            = tag
     };
-    memcpy((void*)msg_envelope_buf, (void*)&envelope, sizeof(nanompi_message_envelope));
-    memcpy((void *)((char*)msg_envelope_buf + sizeof(nanompi_message_envelope)), buf, count * datatype.size);
     int rank = comm->my_rank;
     size_t msg_size = nanompi_get_msg_size(datatype, count);
     if (rank == dest) {
         status = nanompi_self_send(buf, count, datatype, dest, tag, comm);
     } else {
-        status = nanompi_socket_send(msg_envelope_buf, sizeof(nanompi_message_envelope) + (count *datatype.size) , dest, comm);
-    }
+        // send envelope
+        status = nanompi_socket_send(&envelope, sizeof(envelope), dest, comm);
+        // send payload only if the envelope was sent successfully
+        if (status == MPI_SUCCESS) {
+            status = nanompi_socket_send(buf, msg_size, dest, comm);
+        }
     return status;
 }
 
