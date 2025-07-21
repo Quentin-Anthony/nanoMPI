@@ -59,12 +59,13 @@ int MPI_Allgather_ring(const void *sendbuf, int sendcount, MPI_Datatype sendtype
     // Copy local data to receive buffer
     memcpy((char *)recvbuf + ((ptrdiff_t)(rank * recv_size)), sendbuf, recv_size);
 
+    // TODO
     // Ring algorithm
     for (int i = 0; i < size - 1; i++) {
-        int send_to = (rank + 1) % size;
-        int recv_from = (rank - 1 + size) % size;
-        int send_offset = ((rank - i + size) % size) * recv_size;
-        int recv_offset = ((rank - i - 1 + size) % size) * recv_size;
+        // int send_to = (rank + 1) % size;
+        // int recv_from = (rank - 1 + size) % size;
+        // int send_offset = ((rank - i + size) % size) * recv_size;
+        // int recv_offset = ((rank - i - 1 + size) % size) * recv_size;
 
         // MPI_Send(send_data, send_count, send_type, dest, tag, comm);
         // MPI_Recv(recv_data, recv_count, recv_type, source, tag, comm, MPI_STATUS_IGNORE);
