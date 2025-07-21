@@ -217,12 +217,12 @@ int nanompi_socket_send(const void *buffer, size_t msg_size, int to_rank,
   return status;
 }
 // motivation for creating a recv function is because we use the same code a lot
-static void nanompi_recv(void * buffer, int from_rank,  size_t size, nanompi_communicator_t * com)
+static void nanompi_recv(void * buffer, int from_rank,  size_t size, nanompi_communicator_t * comm)
 {
   size_t recv_bytes = 0;
   while (recv_bytes != size)
     recv_bytes += recv(comm->socket_info.client_fds[from_rank],
-                       (char *)&buffer + recv_bytes,
+                       (char *)buffer + recv_bytes,
                        size - recv_bytes, 0);
   return;
 }
@@ -231,13 +231,15 @@ int nanompi_socket_recv(void *buffer, size_t msg_size, int from_rank, int tag,
   int status = MPI_SUCCESS;
   nanompi_message_envelope message_envelope;
   nanompi_recv(&message_envelope, from_rank, sizeof(nanompi_message_envelope), comm);
+  fprintf(stderr, "tag : %d , tag_env: %d \n", tag, message_envelope.tag);
   if(tag != message_envelope.tag)
   {
+	  fprintf(stderr, "is it true? %s", (tag != message_envelope.tag) ? "true": "false");
 	  nanompi_queue_node * match = find_match(message_envelope);
 	  if(match == NULL)
 	  {
 		char * buf = malloc(message_envelope.sizeof_buffer); // maybe be problems freeing this could put it inside the enqueue func
-		memcpy((void * ) buf, buffer, message_envelope.sizeof_buffer);
+  		nanompi_recv(buf , from_rank, message_envelope.sizeof_buffer, comm);
 		enqueue(message_envelope,buf);		
 		while(match == NULL)
 			match = find_match(message_envelope);
@@ -246,8 +248,11 @@ int nanompi_socket_recv(void *buffer, size_t msg_size, int from_rank, int tag,
 	  }	
 	  	memcpy(buffer,(void *) match->buffer, match->envelope.sizeof_buffer);
 		free(match->buffer); // since we malloc another buf when its an unexpected seend  
+		free(match);
+		match->buffer =  match = NULL;
 		return status;
   }
+
   nanompi_recv(buffer, from_rank, message_envelope.sizeof_buffer, comm);
   return status;
 }

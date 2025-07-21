@@ -5,7 +5,6 @@
 #include <stdint.h>
 
 #include "backends/socket/socket_tag_matching.h"
-#include "colls/colls.h"
 #include "comm.h"
 #include "constants.h"
 #include "dtype.h"
@@ -13,7 +12,9 @@
 #include "op.h"
 #include "proc.h"
 #include "status.h"
+#include "colls/colls.h"
 #include "util.h"
+
 
 int MPI_Init(int *argc, char ***argv);
 int MPI_Finalize(void);

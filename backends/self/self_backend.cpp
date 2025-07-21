@@ -30,7 +30,8 @@ public:
     }
 };
 
-unordered_map<pair<int, MPI_COMM>, vector<Send*>> map;
+//unordered_map<pair<int, MPI_COMM>, vector<Send*>> map;
+unordered_map<MPI_Comm,vector<Send*>> map;
 
 extern "C" int nanompi_self_send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)
 {

@@ -7,7 +7,7 @@
 typedef struct nanompi_message_envelope {
   size_t sizeof_buffer;
   int tag;
-  int destination; 
+  int dest; 
   nanompi_communicator_t *comm;
 } nanompi_message_envelope;
 
@@ -18,6 +18,7 @@ typedef struct nanompi_queue_node {
 	nanompi_message_envelope envelope; 
 	char * buffer; 
 	struct nanompi_queue_node* next; 
+	struct nanompi_queue_node * prev; 
 }nanompi_queue_node; 
 typedef struct nanompi_queue {
 	size_t size;
@@ -25,7 +26,7 @@ typedef struct nanompi_queue {
 	nanompi_queue_node * tail; 
 }nanompi_queue;
 void enqueue(nanompi_message_envelope env, char * buffer);
-char * find_match(nanompi_message_envelope env); // dequeue  || return buffer or nanompi_queue_node?  
+nanompi_queue_node * find_match(nanompi_message_envelope env); 
 struct pollfd *mpi_poll_fd_init(MPI_Comm comm, int size);
 int mpi_poll_source(MPI_Comm comm);
 void mpi_poll_fd_destroy(void);
