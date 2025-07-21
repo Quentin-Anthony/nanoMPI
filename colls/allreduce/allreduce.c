@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "../allgatherv/allgatherv.h"
-#include "mpi.h"
+
 #include "util.h"
 
 // We model the total time to run the algorithms in this file using the α − β

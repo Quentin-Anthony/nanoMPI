@@ -67,9 +67,9 @@ int MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag,
     status = nanompi_self_recv(buf, count, datatype, source, tag, comm);
   } else if (source == MPI_ANY_SOURCE) {
     int any_source = mpi_poll_source(comm);
-    status = nanompi_socket_recv(buf, msg_size, any_source, comm);
+    status = nanompi_socket_recv(buf, msg_size, any_source, tag, comm);
   } else {
-    status = nanompi_socket_recv(buf, msg_size, source, comm);
+    status = nanompi_socket_recv(buf, msg_size, source,tag, comm);
   }
   if (st) {
     st->MPI_ERROR = status;

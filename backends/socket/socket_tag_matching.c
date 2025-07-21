@@ -3,6 +3,12 @@
 #include <sys/ioctl.h>
 
 static struct pollfd *fds = NULL;
+static nanompi_queue unexpected_list = {
+	.size = 0,
+	.head = NULL, 
+	.tail = NULL 
+
+}; 
 
 struct pollfd *mpi_poll_fd_init(MPI_Comm comm, int size) {
   if (fds == NULL && size > 0) {
@@ -18,7 +24,15 @@ struct pollfd *mpi_poll_fd_init(MPI_Comm comm, int size) {
   }
   return fds;
 }
+void enqueue(nanompi_message_envelope env, char * buffer)
+{
 
+}
+char * find_match(nanompi_message_envelope env)
+{
+	return NULL; 
+
+}
 // Free and null‑out the static pointer so later calls are safe
 void mpi_poll_fd_destroy(void) {
   free(fds);

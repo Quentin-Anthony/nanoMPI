@@ -22,7 +22,7 @@ int nanompi_free_socket_backend(nanompi_communicator_t *comm);
 
 int nanompi_socket_send(const void *buffer, size_t msg_size, int to_rank,
                         nanompi_communicator_t *comm);
-int nanompi_socket_recv(void *buffer, size_t msg_size, int from_rank,
+int nanompi_socket_recv(void *buffer, size_t msg_size, int from_rank, int tag, 
                         nanompi_communicator_t *comm);
 
 #endif

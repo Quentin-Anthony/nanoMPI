@@ -216,21 +216,38 @@ int nanompi_socket_send(const void *buffer, size_t msg_size, int to_rank,
 
   return status;
 }
-
-int nanompi_socket_recv(void *buffer, size_t msg_size, int from_rank,
+// motivation for creating a recv function is because we use the same code a lot
+static void nanompi_recv(void * buffer, int from_rank,  size_t size, nanompi_communicator_t * com)
+{
+  size_t recv_bytes = 0;
+  while (recv_bytes != size)
+    recv_bytes += recv(comm->socket_info.client_fds[from_rank],
+                       (char *)&buffer + recv_bytes,
+                       size - recv_bytes, 0);
+  return;
+}
+int nanompi_socket_recv(void *buffer, size_t msg_size, int from_rank, int tag,
                         nanompi_communicator_t *comm) {
   int status = MPI_SUCCESS;
-  size_t recv_bytes = 0;
   nanompi_message_envelope message_envelope;
-  while (recv_bytes != sizeof(nanompi_message_envelope))
-    recv_bytes += recv(comm->socket_info.client_fds[from_rank],
-                       (char *)&message_envelope + recv_bytes,
-                       sizeof(nanompi_message_envelope) - recv_bytes, 0);
-  recv_bytes = 0;
-  while (recv_bytes != message_envelope.sizeof_buffer) {
-    recv_bytes +=
-        recv(comm->socket_info.client_fds[from_rank], buffer + recv_bytes,
-             message_envelope.sizeof_buffer - recv_bytes, 0);
+  nanompi_recv(&message_envelope, from_rank, sizeof(nanompi_message_envelope), comm);
+  if(tag != message_envelope.tag)
+  {
+	  nanompi_queue_node * match = find_match(message_envelope);
+	  if(match == NULL)
+	  {
+		char * buf = malloc(message_envelope.sizeof_buffer); // maybe be problems freeing this could put it inside the enqueue func
+		memcpy((void * ) buf, buffer, message_envelope.sizeof_buffer);
+		enqueue(message_envelope,buf);		
+		while(match == NULL)
+			match = find_match(message_envelope);
+		// we want to block until we get a matching send 
+		return status; 
+	  }	
+	  	memcpy(buffer,(void *) match->buffer, match->envelope.sizeof_buffer);
+		free(match->buffer); // since we malloc another buf when its an unexpected seend  
+		return status;
   }
+  nanompi_recv(buffer, from_rank, message_envelope.sizeof_buffer, comm);
   return status;
 }
