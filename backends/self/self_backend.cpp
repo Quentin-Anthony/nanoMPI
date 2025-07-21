@@ -21,7 +21,7 @@ class Send {
 
     Send(const void *userbuf, int count, MPI_Datatype datatype, int tag, MPI_Comm comm)
         : userbuf(userbuf), count(count), datatype(datatype), tag(tag) {
-        size_t msg_size = static_cast<size_t>(count * nanompi_get_dtype_size(datatype));
+        auto msg_size = count * nanompi_get_dtype_size(datatype);
         libbuf = malloc(msg_size);
         memcpy(libbuf, userbuf, msg_size);
     }
@@ -34,7 +34,7 @@ unordered_map<MPI_Comm, vector<Send *>> map;
 extern "C" int nanompi_self_send(const void *buf, int count, MPI_Datatype datatype, int dest,
                                  int tag, MPI_Comm comm) {
     if (dest != comm->my_rank) {
-        cout << "error: rank using self send but not to itself!" << endl;
+        cout << "error: rank using self send but not to itself!\n";
     }
 
     map[comm].push_back(new Send(buf, count, datatype, tag, comm));

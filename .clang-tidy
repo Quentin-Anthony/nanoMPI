@@ -19,6 +19,7 @@ Checks: >
   -bugprone-assignment-in-if-condition,
   -clang-analyzer-security.insecureAPI.*,
   -bugprone-implicit-widening-of-multiplication-result,
-  -readability-non-const-parameter
+  -readability-non-const-parameter,
+  -bugprone-narrowing-conversions
 HeaderFilterRegex: '.*'
 FormatStyle: file

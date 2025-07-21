@@ -25,9 +25,10 @@ int MPI_Allgather_bruck(const void *sendbuf, int sendcount, MPI_Datatype sendtyp
     memcpy(temp_buf, recvbuf, total_size);
 
     // Bruck algorithm
+    // TODO
     for (int i = 1; i < size; i <<= 1) {
-        int send_to = (rank + i) % size;
-        int recv_from = (rank - i + size) % size;
+        // int send_to = (rank + i) % size;
+        // int recv_from = (rank - i + size) % size;
 
         // MPI_Send(send_data, send_count, sendtype, dest, tag, comm);
         // MPI_Recv(recv_data, recv_count, recvtype, source, tag, comm, MPI_STATUS_IGNORE);

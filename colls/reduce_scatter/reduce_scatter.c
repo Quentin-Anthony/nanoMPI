@@ -15,6 +15,7 @@ int MPI_Reduce_scatter_basic(const void *sendbuf, void *recvbuf, const int recvc
     for (int i = 0; i < size; i++) {
         total_count += recvcounts[i];
     }
+    assert(total_count > 0);
 
     void *tempbuf = malloc(total_count * nanompi_get_dtype_size(datatype));
     MPI_Allreduce(sendbuf, tempbuf, total_count, datatype, op, comm);

@@ -21,6 +21,7 @@ int MPI_Allgatherv_basic(const void *sendbuf, int sendcount, MPI_Datatype sendty
     for (int i = 0; i < size; i++) {
         total_recv_count += recvcounts[i];
     }
+    assert(total_recv_count > 0);
 
     MPI_Bcast(recvbuf, total_recv_count, recvtype, 0, comm);
 
