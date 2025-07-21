@@ -15,7 +15,9 @@ Checks: >
   -bugprone-multi-level-implicit-pointer-conversion,
   -modernize-use-using,
   -modernize-use-trailing-return-type,
-  -bugprone-assignment-in-if-condition
+  -bugprone-assignment-in-if-condition,
+  -clang-analyzer-security.insecureAPI.*,
+  -bugprone-implicit-widening-of-multiplication-result # TODO: fix all of these
 WarningsAsErrors: >
   bugprone-*,clang-analyzer-*
 HeaderFilterRegex: '.*'

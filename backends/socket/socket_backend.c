@@ -110,7 +110,7 @@ static int init_clients(nanompi_communicator_t *comm) {
     // without doing anything
     for (i = rank + 1; i < size; i++) {
         // Get ip of hostname (resolve dns)
-        if (err = getaddrinfo(grp_proc_pointers[i]->hostname, NULL, &hints, &res) != 0) {
+        if ((err = getaddrinfo(grp_proc_pointers[i]->hostname, NULL, &hints, &res)) != 0) {
             printf("getaddrinfo failed: %s\n", gai_strerror(err));
             goto free;
         }
@@ -150,9 +150,11 @@ int nanompi_init_socket_backend(nanompi_communicator_t *comm) {
     int size = comm->local_group->grp_proc_count;
 
     comm->socket_info.client_fds = (int *)malloc(sizeof(int) * size);
+    assert(comm->socket_info.client_fds);
     if (!comm->socket_info.client_fds) {
         PRINT_STDERR("Error mallocing client fds\n");
         status = MPI_ERR_OTHER;
+        goto exit;
     }
 
     status = init_clients(comm);
@@ -177,7 +179,6 @@ free:
 int nanompi_free_socket_backend(nanompi_communicator_t *comm) {
     int status = MPI_SUCCESS;
     int size = comm->local_group->grp_proc_count;
-    int rank = comm->my_rank;
     int i;
 
     for (i = 0; i < size; i++) {

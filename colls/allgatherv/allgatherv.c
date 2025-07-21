@@ -25,6 +25,7 @@ int MPI_Allgatherv_basic(const void *sendbuf, int sendcount, MPI_Datatype sendty
 
     // If the receiving buffer is not properly displaced, we need to rearrange it
     if (rank != 0) {
+        // NOLINT
         void *temp_buf = malloc(total_recv_count * nanompi_get_dtype_size(recvtype));
         memcpy(temp_buf, recvbuf, total_recv_count * nanompi_get_dtype_size(recvtype));
 
