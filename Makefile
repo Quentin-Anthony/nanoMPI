@@ -68,4 +68,4 @@ check-format:  ## Fails if any file would be re‑formatted
 tidy:         ## Runs clang‑tidy using compile_commands.json
 	@command -v bear >/dev/null || (echo "bear not found - sudo apt install bear"; exit 1)
 	bear -- make -j$(nproc) libmpi.so
-	run-clang-tidy -p . -quiet
+	run-clang-tidy -p . -quiet -config-file=.clang-tidy

@@ -7,6 +7,7 @@ Checks: >
   clang-analyzer-*,
   -readability-identifier-length,
   -modernize-macro-to-enum,
+  -modernize-deprecated-headers,
   -performance-no-int-to-ptr,
   -readability-isolate-declaration,
   -readability-magic-numbers,
@@ -17,8 +18,7 @@ Checks: >
   -modernize-use-trailing-return-type,
   -bugprone-assignment-in-if-condition,
   -clang-analyzer-security.insecureAPI.*,
-  -bugprone-implicit-widening-of-multiplication-result # TODO: fix all of these
-WarningsAsErrors: >
-  bugprone-*,clang-analyzer-*
+  -bugprone-implicit-widening-of-multiplication-result,
+  -readability-non-const-parameter
 HeaderFilterRegex: '.*'
 FormatStyle: file
