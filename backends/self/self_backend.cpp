@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <cstring>
 #include <iostream>
 #include <unordered_map>
@@ -20,7 +21,7 @@ class Send {
 
     Send(const void *userbuf, int count, MPI_Datatype datatype, int tag, MPI_Comm comm)
         : userbuf(userbuf), count(count), datatype(datatype), tag(tag) {
-        size_t msg_size = count * nanompi_get_dtype_size(datatype);
+        size_t msg_size = static_cast<size_t>(count * nanompi_get_dtype_size(datatype));
         libbuf = malloc(msg_size);
         memcpy(libbuf, userbuf, msg_size);
     }

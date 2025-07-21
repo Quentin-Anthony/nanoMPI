@@ -2,6 +2,7 @@
 
 #include "mpi.h"
 #include "util.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,7 +18,7 @@ int MPI_Allgather_bruck(const void *sendbuf, int sendcount, MPI_Datatype sendtyp
     int total_size = recv_size * size;
 
     // Copy local data to receive buffer
-    memcpy((char *)recvbuf + rank * recv_size, sendbuf, recv_size);
+    memcpy((char *)recvbuf + ((ptrdiff_t)(rank * recv_size)), sendbuf, recv_size);
 
     // Allocate temporary buffer
     void *temp_buf = malloc(total_size);
@@ -37,7 +38,7 @@ int MPI_Allgather_bruck(const void *sendbuf, int sendcount, MPI_Datatype sendtyp
     // Rearrange data in the correct order
     for (int i = 0; i < size; i++) {
         int src = (rank - i + size) % size;
-        memcpy((char *)recvbuf + i * recv_size, (char *)temp_buf + src * recv_size, recv_size);
+        memcpy((char *)recvbuf + ((ptrdiff_t)(i * recv_size)), (char *)temp_buf + ((ptrdiff_t)(src * recv_size)), recv_size);
     }
 
     free(temp_buf);
@@ -54,7 +55,7 @@ int MPI_Allgather_ring(const void *sendbuf, int sendcount, MPI_Datatype sendtype
     int recv_size = recvcount * type_size;
 
     // Copy local data to receive buffer
-    memcpy((char *)recvbuf + rank * recv_size, sendbuf, recv_size);
+    memcpy((char *)recvbuf + ((ptrdiff_t)(rank * recv_size)), sendbuf, recv_size);
 
     // Ring algorithm
     for (int i = 0; i < size - 1; i++) {

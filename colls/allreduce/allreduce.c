@@ -1,5 +1,6 @@
 // colls/allreduce.c
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -44,8 +45,8 @@ int MPI_Allreduce_ring(const void *sendbuf, void *recvbuf, int count, MPI_Dataty
 
     // Reduce-scatter
     for (int i = 0; i < size - 1; i++) {
-        ptrdiff_t send_offset = chunk_size * mod(rank - i, size);
-        ptrdiff_t recv_offset = chunk_size * mod(rank - i - 1, size);
+        ptrdiff_t send_offset = (ptrdiff_t)(chunk_size * mod(rank - i, size));
+        ptrdiff_t recv_offset = (ptrdiff_t)(chunk_size * mod(rank - i - 1, size));
 
         MPI_Send(send_buf + send_offset, chunk_count, datatype, send_to, 0, comm);
         MPI_Recv(temp_buf + recv_offset, chunk_count, datatype, recv_from, 0, comm,
@@ -63,8 +64,8 @@ int MPI_Allreduce_ring(const void *sendbuf, void *recvbuf, int count, MPI_Dataty
 
     // Allgather
     for (int i = 0; i < size - 1; i++) {
-        ptrdiff_t send_offset = chunk_size * mod(rank - i + 1, size);
-        ptrdiff_t recv_offset = chunk_size * mod(rank - i, size);
+        ptrdiff_t send_offset = (ptrdiff_t)(chunk_size * mod(rank - i + 1, size));
+        ptrdiff_t recv_offset = (ptrdiff_t)(chunk_size * mod(rank - i, size));
 
         MPI_Send(recvbuf + send_offset, chunk_count, datatype, send_to, 0, comm);
         MPI_Recv(recvbuf + recv_offset, chunk_count, datatype, recv_from, 0, comm,

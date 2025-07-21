@@ -125,8 +125,9 @@ static int init_clients(nanompi_communicator_t *comm) {
         sa_in->sin_port = htons(grp_proc_pointers[i]->port);
 
         // This client may have reached here before the server called accept(), so just keep trying
-        while (connect(comm->socket_info.client_fds[i], res->ai_addr, res->ai_addrlen))
+        while (connect(comm->socket_info.client_fds[i], res->ai_addr, res->ai_addrlen)) {
             ;
+}
 
         freeaddrinfo(res);
         res = NULL;

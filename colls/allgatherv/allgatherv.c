@@ -1,6 +1,7 @@
 #include "mpi.h"
 #include "util.h"
 
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -30,8 +31,8 @@ int MPI_Allgatherv_basic(const void *sendbuf, int sendcount, MPI_Datatype sendty
         memcpy(temp_buf, recvbuf, total_recv_count * nanompi_get_dtype_size(recvtype));
 
         for (int i = 0; i < size; i++) {
-            memcpy((char *)recvbuf + displs[i] * nanompi_get_dtype_size(recvtype),
-                   (char *)temp_buf + (displs[i] * nanompi_get_dtype_size(recvtype)),
+            memcpy((char *)recvbuf + ((ptrdiff_t)(displs[i] * nanompi_get_dtype_size(recvtype))),
+                   (char *)temp_buf + ((ptrdiff_t)(displs[i] * nanompi_get_dtype_size(recvtype))),
                    recvcounts[i] * nanompi_get_dtype_size(recvtype));
         }
 

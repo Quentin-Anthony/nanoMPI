@@ -1,6 +1,7 @@
 #include "mpi.h"
 #include "util.h"
 
+#include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -23,7 +24,7 @@ int MPI_Reduce_scatter_basic(const void *sendbuf, void *recvbuf, const int recvc
         offset += recvcounts[i];
     }
 
-    memcpy(recvbuf, (char *)tempbuf + offset * nanompi_get_dtype_size(datatype),
+    memcpy(recvbuf, (char *)tempbuf + ((ptrdiff_t)(offset * nanompi_get_dtype_size(datatype))),
            recvcounts[rank] * nanompi_get_dtype_size(datatype));
     free(tempbuf);
 
