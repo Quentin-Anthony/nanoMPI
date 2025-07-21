@@ -38,7 +38,8 @@ int MPI_Allgather_bruck(const void *sendbuf, int sendcount, MPI_Datatype sendtyp
     // Rearrange data in the correct order
     for (int i = 0; i < size; i++) {
         int src = (rank - i + size) % size;
-        memcpy((char *)recvbuf + ((ptrdiff_t)(i * recv_size)), (char *)temp_buf + ((ptrdiff_t)(src * recv_size)), recv_size);
+        memcpy((char *)recvbuf + ((ptrdiff_t)(i * recv_size)),
+               (char *)temp_buf + ((ptrdiff_t)(src * recv_size)), recv_size);
     }
 
     free(temp_buf);

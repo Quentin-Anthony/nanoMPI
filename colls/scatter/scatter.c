@@ -13,10 +13,13 @@ int MPI_Scatter_basic(const void *sendbuf, int sendcount, MPI_Datatype sendtype,
     if (rank == root) {
         for (int i = 0; i < size; i++) {
             if (i != root) {
-                MPI_Send((char *)sendbuf + ((ptrdiff_t)(i * sendcount * nanompi_get_dtype_size(sendtype))),
+                MPI_Send((char *)sendbuf +
+                             ((ptrdiff_t)(i * sendcount * nanompi_get_dtype_size(sendtype))),
                          sendcount, sendtype, i, 0, comm);
             } else {
-                memcpy(recvbuf, (char *)sendbuf + ((ptrdiff_t)(i * sendcount * nanompi_get_dtype_size(sendtype))),
+                memcpy(recvbuf,
+                       (char *)sendbuf +
+                           ((ptrdiff_t)(i * sendcount * nanompi_get_dtype_size(sendtype))),
                        recvcount * nanompi_get_dtype_size(recvtype));
             }
         }
