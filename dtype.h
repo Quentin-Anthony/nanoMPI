@@ -14,7 +14,7 @@ enum nanompi_dtype_id {
 
 typedef struct nanompi_dtype_t {
     enum nanompi_dtype_id    id;
-    size_t                   size;
+    int                      size;
 } nanompi_dtype_t;
 
 typedef nanompi_dtype_t MPI_Datatype;

@@ -1,7 +1,21 @@
 Checks: >
-  bugprone-*,performance-*,readability-*,portability-*,
-  modernize-*,clang-analyzer-*,
-  -modernize-use-trailing-return-type       # example of disabling a noisy check
+  bugprone-*,
+  performance-*,
+  readability-*,
+  portability-*,
+  modernize-*,
+  clang-analyzer-*,
+  -readability-identifier-length,
+  -modernize-macro-to-enum,
+  -performance-no-int-to-ptr,
+  -readability-isolate-declaration,
+  -readability-magic-numbers,
+  -readability-function-cognitive-complexity,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-multi-level-implicit-pointer-conversion,
+  -modernize-use-using,
+  -modernize-use-trailing-return-type,
+  -bugprone-assignment-in-if-condition
 WarningsAsErrors: >
   bugprone-*,clang-analyzer-*
 HeaderFilterRegex: '.*'
