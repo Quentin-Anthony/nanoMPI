@@ -53,19 +53,3 @@ tests: $(TEST_TARGETS)
 
 tests/test_%: tests/test_%.c libmpi.so
 	$(CC) -g -o $@ $< -L. -I. -lmpi
-
-# Formatting
-FMT_SRCS := $(SOURCES_C) $(SOURCES_CPP) $(wildcard tests/*.c)
-
-.PHONY: format check-format tidy
-
-format:      ## Rewrites code in place
-	clang-format -i $(FMT_SRCS)
-
-check-format:  ## Fails if any file would be re‑formatted
-	clang-format --dry-run --Werror $(FMT_SRCS)
-
-tidy:         ## Runs clang‑tidy using compile_commands.json
-	@command -v bear >/dev/null || (echo "bear not found - sudo apt install bear"; exit 1)
-	bear -- make -j$(nproc) libmpi.so
-	run-clang-tidy -p . -quiet -config=.clang-tidy
