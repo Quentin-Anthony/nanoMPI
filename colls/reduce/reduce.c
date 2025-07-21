@@ -1,12 +1,12 @@
 #include "mpi.h"
 #include "util.h"
 
-#include <string.h>
+#include <stddef.h>
 #include <stdlib.h>
+#include <string.h>
 
 int MPI_Reduce_basic(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
-               MPI_Op op, int root, MPI_Comm comm)
-{
+                     MPI_Op op, int root, MPI_Comm comm) {
     int rank, size;
     MPI_Comm_rank(comm, &rank);
     MPI_Comm_size(comm, &size);
@@ -19,7 +19,7 @@ int MPI_Reduce_basic(const void *sendbuf, void *recvbuf, int count, MPI_Datatype
                 MPI_Recv(tempbuf, count, datatype, i, 0, comm, MPI_STATUS_IGNORE);
                 // TODO: other reduction ops
                 for (int j = 0; j < count; j++) {
-                    ((int*)recvbuf)[j] += ((int*)tempbuf)[j];
+                    ((int *)recvbuf)[j] += ((int *)tempbuf)[j];
                 }
                 free(tempbuf);
             }

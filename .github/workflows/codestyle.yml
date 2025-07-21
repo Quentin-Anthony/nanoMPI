@@ -1,0 +1,46 @@
+name: Code-style
+
+on:
+  pull_request:
+    branches: [ main ]
+
+env:
+  CLANG_VER: 17
+  GIT_CF: https://raw.githubusercontent.com/llvm/llvm-project/release/11.x/clang/tools/clang-format/git-clang-format
+
+jobs:
+  style:
+    runs-on: ubuntu-22.04
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install clang tools
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends wget gpg
+        # Setup LLVM repository
+        sudo mkdir -p /etc/apt/keyrings
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/llvm.gpg
+        echo "deb [signed-by=/etc/apt/keyrings/llvm.gpg] http://apt.llvm.org/jammy/ llvm-toolchain-jammy-${CLANG_VER} main" | sudo tee /etc/apt/sources.list.d/llvm.list
+        sudo apt-get update
+        sudo apt-get install -y --no-install-recommends clang-tidy-${CLANG_VER} bear clang-${CLANG_VER} clang++-${CLANG_VER}
+        curl -OL $GIT_CF && chmod +x ./git-clang-format && sudo mv ./git-clang-format /usr/bin/git-clang-format
+
+    - name: Check code format
+      run: |
+        set -eE
+        echo "Commit ${{ github.event.pull_request.base.sha }}"
+        diff=`git clang-format --binary=clang-format-${CLANG_VER} --style=file --diff ${{ github.event.pull_request.base.sha }}`
+        if [ "$diff" = "no modified files to format" ] || [ "$diff" = "clang-format did not modify any files" ]
+        then
+          echo "Format check PASS"
+        else
+          echo "Please check code format:"
+          echo "$diff"
+        fi
+
+    - name: Run clang-tidy
+      run: |
+        bear -- make -j$(nproc) libmpi.so
+        run-clang-tidy-${CLANG_VER} -p . -quiet
