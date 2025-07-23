@@ -1,8 +1,7 @@
 #include "mpi.h"
 #include "util.h"
 
-int MPI_Barrier_basic(MPI_Comm comm)
-{
+int MPI_Barrier_basic(MPI_Comm comm) {
     int rank, size;
     char tmp;
     MPI_Comm_rank(comm, &rank);

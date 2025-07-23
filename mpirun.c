@@ -35,6 +35,8 @@ void* execute_command_on_host(void *args) {
     if (system(ssh_command) == -1) {
         perror("system");
     }
+
+    return NULL;
 }
 
 int main(int argc, char *argv[]) {

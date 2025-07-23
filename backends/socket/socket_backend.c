@@ -1,22 +1,20 @@
+#include <arpa/inet.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <netinet/tcp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <fcntl.h>
-#include <arpa/inet.h>
-#include <netinet/tcp.h>
-#include <netdb.h>
-#include <errno.h>
 
-#include "socket_backend.h"
 #include "constants.h"
+#include "socket_backend.h"
 
-#include "util.h"
 #include "comm.h"
+#include "util.h"
 
-
-static int init_server(nanompi_communicator_t *comm)
-{
+static int init_server(nanompi_communicator_t *comm) {
     struct sockaddr_in address;
     int status = MPI_SUCCESS;
     int rank = comm->my_rank;
@@ -50,12 +48,13 @@ static int init_server(nanompi_communicator_t *comm)
     }
 
     // Turn off Nagle's algorithm
-    // Nagle's algorithm is an OS-level buffering solution. The idea is for chat-like applications where a user
-    // is typing in one byte at a time, the socket can coalesce (i.e., merge multiple small sends into one large send)
-    // these bytes to massively increase throughput by reducing the amount of control messages going back and forth.
-    // We want it off so that for small messages, it doesn't wait for the timeout before sending, messing up the
-    // latency measurement.
-    if (setsockopt(comm->socket_info.server_fd, IPPROTO_TCP, TCP_NODELAY, (char *) &opt, sizeof(opt))) {
+    // Nagle's algorithm is an OS-level buffering solution. The idea is for chat-like applications
+    // where a user is typing in one byte at a time, the socket can coalesce (i.e., merge multiple
+    // small sends into one large send) these bytes to massively increase throughput by reducing the
+    // amount of control messages going back and forth. We want it off so that for small messages,
+    // it doesn't wait for the timeout before sending, messing up the latency measurement.
+    if (setsockopt(comm->socket_info.server_fd, IPPROTO_TCP, TCP_NODELAY, (char *)&opt,
+                   sizeof(opt))) {
         perror("setsockopt");
         status = MPI_ERR_OTHER;
         goto close;
@@ -67,7 +66,8 @@ static int init_server(nanompi_communicator_t *comm)
 
     if (bind(comm->socket_info.server_fd, (struct sockaddr *)&address, sizeof(address)) < 0) {
         char bind_msg[1024] = {'\0'};
-        snprintf( bind_msg, 1023, "function %s, file %s, line %d, rank %d, port %d, bind error", __func__, __FILE__, __LINE__, rank, grp_proc_pointers[rank]->port);
+        snprintf(bind_msg, 1023, "function %s, file %s, line %d, rank %d, port %d, bind error",
+                 __func__, __FILE__, __LINE__, rank, grp_proc_pointers[rank]->port);
         perror(bind_msg);
         status = MPI_ERR_OTHER;
         goto close;
@@ -79,16 +79,15 @@ static int init_server(nanompi_communicator_t *comm)
         goto close;
     }
 
-    for(i = rank - 1; i >= 0; i--) {
-        // Here "address" is a wildcard--meaning accept a connection from any address. However, since connect/accept is blocking and we "connect"
-        // to the next higher/lower rank, we fill out client_fds in rank order
-        // e.g. ranks are 0 1 2
-        // 0 connects to 1 and blocks
-        // 1 connects to 2 and blocks
-        // 2 accepts 1, unblocking 1. 1 is in rank order in 2's client_fds
-        // 2 accepts 0, 0 is in rank order in 2's client_fds
-        // 1 accepts 0, 0 is in rank order in 1's client_fds
-        comm->socket_info.client_fds[i] = accept(comm->socket_info.server_fd, (struct sockaddr *)&address, (socklen_t*)&addrlen);
+
+    for (i = rank - 1; i >= 0; i--) {
+        // Here "address" is a wildcard--meaning accept a connection from any address. However,
+        // since connect/accept is blocking and we "connect" to the next higher/lower rank, we fill
+        // out client_fds in rank order e.g. ranks are 0 1 2 0 connects to 1 and blocks 1 connects
+        // to 2 and blocks 2 accepts 1, unblocking 1. 1 is in rank order in 2's client_fds 2 accepts
+        // 0, 0 is in rank order in 2's client_fds 1 accepts 0, 0 is in rank order in 1's client_fds
+        comm->socket_info.client_fds[i] =
+            accept(comm->socket_info.server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen);
     }
 
 exit:
@@ -98,8 +97,7 @@ close:
     goto exit;
 }
 
-static int init_clients(nanompi_communicator_t *comm)
-{
+static int init_clients(nanompi_communicator_t *comm) {
     int status = MPI_SUCCESS;
     int rank = comm->my_rank;
     int size = comm->local_group->grp_proc_count;
@@ -110,13 +108,13 @@ static int init_clients(nanompi_communicator_t *comm)
     struct sockaddr_in *sa_in;
 
     memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_INET;  // IPv4
+    hints.ai_family = AF_INET; // IPv4
 
     // Make a client socket for every rank greater than mine. Last rank just returns
     // without doing anything
-    for(i = rank + 1; i < size; i++) {
+    for (i = rank + 1; i < size; i++) {
         // Get ip of hostname (resolve dns)
-        if (err = getaddrinfo(grp_proc_pointers[i]->hostname, NULL, &hints, &res) != 0) {
+        if ((err = getaddrinfo(grp_proc_pointers[i]->hostname, NULL, &hints, &res)) != 0) {
             printf("getaddrinfo failed: %s\n", gai_strerror(err));
             goto free;
         }
@@ -131,7 +129,9 @@ static int init_clients(nanompi_communicator_t *comm)
         sa_in->sin_port = htons(grp_proc_pointers[i]->port);
 
         // This client may have reached here before the server called accept(), so just keep trying
-        while (connect(comm->socket_info.client_fds[i], res->ai_addr, res->ai_addrlen));
+        while (connect(comm->socket_info.client_fds[i], res->ai_addr, res->ai_addrlen)) {
+            ;
+        }
 
         freeaddrinfo(res);
         res = NULL;
@@ -143,22 +143,23 @@ free:
     if (res) {
         freeaddrinfo(res);
     }
-    for(i--; i >= rank + 1; i--) {
+    for (i--; i >= rank + 1; i--) {
         close(comm->socket_info.client_fds[i]);
     }
     status = MPI_ERR_OTHER;
     goto exit;
 }
 
-int nanompi_init_socket_backend(nanompi_communicator_t *comm)
-{
+int nanompi_init_socket_backend(nanompi_communicator_t *comm) {
     int status = MPI_SUCCESS;
     int size = comm->local_group->grp_proc_count;
 
-    comm->socket_info.client_fds = (int*) malloc(sizeof(int) * size);
+    comm->socket_info.client_fds = (int *)malloc(sizeof(int) * size);
+    assert(comm->socket_info.client_fds);
     if (!comm->socket_info.client_fds) {
         PRINT_STDERR("Error mallocing client fds\n");
         status = MPI_ERR_OTHER;
+        goto exit;
     }
 
     status = init_clients(comm);
@@ -180,11 +181,9 @@ free:
     goto exit;
 }
 
-int nanompi_free_socket_backend(nanompi_communicator_t *comm)
-{
+int nanompi_free_socket_backend(nanompi_communicator_t *comm) {
     int status = MPI_SUCCESS;
     int size = comm->local_group->grp_proc_count;
-    int rank = comm->my_rank;
     int i;
 
     for (i = 0; i < size; i++) {
@@ -197,25 +196,27 @@ int nanompi_free_socket_backend(nanompi_communicator_t *comm)
     return status;
 }
 
-int nanompi_socket_send(const void *buffer, size_t msg_size, int to_rank, nanompi_communicator_t *comm)
-{
+int nanompi_socket_send(const void *buffer, size_t msg_size, int to_rank,
+                        nanompi_communicator_t *comm) {
     int status = MPI_SUCCESS;
     size_t sent_bytes = 0;
 
     while (sent_bytes != msg_size) {
-        sent_bytes += send(comm->socket_info.client_fds[to_rank], buffer + sent_bytes, msg_size - sent_bytes, 0);
+        sent_bytes += send(comm->socket_info.client_fds[to_rank], buffer + sent_bytes,
+                           msg_size - sent_bytes, 0);
     }
 
     return status;
 }
 
-int nanompi_socket_recv(void *buffer, size_t msg_size, int from_rank, nanompi_communicator_t *comm)
-{
+int nanompi_socket_recv(void *buffer, size_t msg_size, int from_rank,
+                        nanompi_communicator_t *comm) {
     int status = MPI_SUCCESS;
     size_t recv_bytes = 0;
 
     while (recv_bytes != msg_size) {
-        recv_bytes += recv(comm->socket_info.client_fds[from_rank], buffer + recv_bytes, msg_size - recv_bytes, 0);
+        recv_bytes += recv(comm->socket_info.client_fds[from_rank], buffer + recv_bytes,
+                           msg_size - recv_bytes, 0);
     }
 
     return status;

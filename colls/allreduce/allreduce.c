@@ -1,12 +1,13 @@
 // colls/allreduce.c
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "../allgatherv/allgatherv.h"
 #include "mpi.h"
 #include "util.h"
-#include "../allgatherv/allgatherv.h"
 
 // We model the total time to run the algorithms in this file using the α − β cost
 // model, also called the Hockney model (https://doi.org/10.1016/S0167-8191(06)80021-9).
@@ -22,8 +23,7 @@
 // T_ring = 2(p − 1)α + 2nβ + nγ − (1/p)(2nβ+nγ)
 // TODO: expand on derivation
 int MPI_Allreduce_ring(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
-                       MPI_Op op, MPI_Comm comm)
-{
+                       MPI_Op op, MPI_Comm comm) {
     int rank, size;
     MPI_Comm_rank(comm, &rank);
     MPI_Comm_size(comm, &size);
@@ -34,7 +34,7 @@ int MPI_Allreduce_ring(const void *sendbuf, void *recvbuf, int count, MPI_Dataty
     int chunk_count = count / size;
     int chunk_size = chunk_count * type_size;
     int chunk_rem = count % size; // todo: handle remainder instead of the following assert
-    assert(chunk_rem == 0); // msg size too small for ring allreduce
+    assert(chunk_rem == 0);       // msg size too small for ring allreduce
 
     // Copy sendbuf to recvbuf
     memcpy(recvbuf, sendbuf, count * type_size);
@@ -49,7 +49,8 @@ int MPI_Allreduce_ring(const void *sendbuf, void *recvbuf, int count, MPI_Dataty
         ptrdiff_t recv_offset = chunk_size * mod(rank - i - 1, size);
 
         MPI_Send(send_buf + send_offset, chunk_count, datatype, send_to, 0, comm);
-        MPI_Recv(temp_buf + recv_offset, chunk_count, datatype, recv_from, 0, comm, MPI_STATUS_IGNORE);
+        MPI_Recv(temp_buf + recv_offset, chunk_count, datatype, recv_from, 0, comm,
+                 MPI_STATUS_IGNORE);
 
         // Perform reduction operation
         op.fn(temp_buf + recv_offset, recvbuf + recv_offset, &chunk_count, &datatype);
@@ -67,7 +68,8 @@ int MPI_Allreduce_ring(const void *sendbuf, void *recvbuf, int count, MPI_Dataty
         ptrdiff_t recv_offset = chunk_size * mod(rank - i, size);
 
         MPI_Send(recvbuf + send_offset, chunk_count, datatype, send_to, 0, comm);
-        MPI_Recv(recvbuf + recv_offset, chunk_count, datatype, recv_from, 0, comm, MPI_STATUS_IGNORE);
+        MPI_Recv(recvbuf + recv_offset, chunk_count, datatype, recv_from, 0, comm,
+                 MPI_STATUS_IGNORE);
     }
 
     free(temp_buf);
@@ -75,19 +77,16 @@ int MPI_Allreduce_ring(const void *sendbuf, void *recvbuf, int count, MPI_Dataty
     return MPI_SUCCESS;
 }
 
-
 int MPI_Allreduce_reduce_bcast(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
-                               MPI_Op op, MPI_Comm comm)
-{
+                               MPI_Op op, MPI_Comm comm) {
     MPI_Reduce(sendbuf, recvbuf, count, datatype, op, 0, comm);
     MPI_Bcast(recvbuf, count, datatype, 0, comm);
 
     return MPI_SUCCESS;
 }
 
-int MPI_Allreduce_reduce_scatter_allgather(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
-                                           MPI_Op op, MPI_Comm comm)
-{
+int MPI_Allreduce_reduce_scatter_allgather(const void *sendbuf, void *recvbuf, int count,
+                                           MPI_Datatype datatype, MPI_Op op, MPI_Comm comm) {
     int rank, size;
     MPI_Comm_rank(comm, &rank);
     MPI_Comm_size(comm, &size);
@@ -102,7 +101,7 @@ int MPI_Allreduce_reduce_scatter_allgather(const void *sendbuf, void *recvbuf, i
 
     for (int i = 0; i < size; i++) {
         recvcounts[i] = chunk_size + (i < remainder ? 1 : 0);
-        displs[i] = (i > 0) ? (displs[i-1] + recvcounts[i-1]) : 0;
+        displs[i] = (i > 0) ? (displs[i - 1] + recvcounts[i - 1]) : 0;
     }
 
     void *temp_buf = malloc(count * type_size);
@@ -111,8 +110,8 @@ int MPI_Allreduce_reduce_scatter_allgather(const void *sendbuf, void *recvbuf, i
     MPI_Reduce_scatter(sendbuf, temp_buf, recvcounts, datatype, op, comm);
 
     // Allgather
-    MPI_Allgatherv(temp_buf, recvcounts[rank], datatype,
-                   recvbuf, recvcounts, displs, datatype, comm);
+    MPI_Allgatherv(temp_buf, recvcounts[rank], datatype, recvbuf, recvcounts, displs, datatype,
+                   comm);
 
     free(recvcounts);
     free(displs);
@@ -122,8 +121,7 @@ int MPI_Allreduce_reduce_scatter_allgather(const void *sendbuf, void *recvbuf, i
 }
 
 int MPI_Allreduce_basic(const void *sendbuf, void *recvbuf, int count, MPI_Datatype datatype,
-                  MPI_Op op, MPI_Comm comm)
-{
+                        MPI_Op op, MPI_Comm comm) {
     int rank, size;
     MPI_Comm_rank(comm, &rank);
     MPI_Comm_size(comm, &size);

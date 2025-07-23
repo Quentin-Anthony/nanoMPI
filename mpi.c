@@ -1,12 +1,11 @@
 #include <string.h>
 
+#include "backends/self/self_backend.h"
+#include "backends/socket/socket_backend.h"
 #include "mpi.h"
 #include "util.h"
-#include "backends/socket/socket_backend.h"
-#include "backends/self/self_backend.h"
 
-int MPI_Init(int *argc, char ***argv)
-{
+int MPI_Init(int *argc, char ***argv) {
     int status = MPI_SUCCESS;
     int my_rank = atoi(getenv("NANOMPI_WORLD_RANK"));
     int world_size = atoi(getenv("NANOMPI_WORLD_SIZE"));
@@ -27,21 +26,19 @@ int MPI_Init(int *argc, char ***argv)
     return status;
 }
 
-int MPI_Finalize(void)
-{
+int MPI_Finalize(void) {
     int status;
-    
+
     status = nanompi_free_comm(nanompi_comm_world);
     if (status) {
         PRINT_STDERR("Error in nanompi_free_comm\n");
     }
-    
+
     return status;
 }
 
 // TODO: tags, generate a message envelope with match info so the recv side can match
-int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm)
-{
+int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int tag, MPI_Comm comm) {
     int status = MPI_SUCCESS;
 
     int rank = comm->my_rank;
@@ -54,9 +51,10 @@ int MPI_Send(const void *buf, int count, MPI_Datatype datatype, int dest, int ta
     return status;
 }
 
-// TODO: tags, MPI_ANY_SOURCE, matching with a variable (but lesser than) count that the user passed, etc.
-int MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm, MPI_Status *st)
-{
+// TODO: tags, MPI_ANY_SOURCE, matching with a variable (but lesser than) count that the user
+// passed, etc.
+int MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, MPI_Comm comm,
+             MPI_Status *st) {
     int status = MPI_SUCCESS;
 
     size_t msg_size = nanompi_get_msg_size(datatype, count);
@@ -66,7 +64,7 @@ int MPI_Recv(void *buf, int count, MPI_Datatype datatype, int source, int tag, M
     } else {
         status = nanompi_socket_recv(buf, msg_size, source, comm);
     }
-    if(st) {
+    if (st) {
         st->MPI_ERROR = status;
         st->MPI_SOURCE = source;
         st->MPI_TAG = tag;
