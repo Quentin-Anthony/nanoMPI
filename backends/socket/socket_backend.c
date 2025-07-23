@@ -77,7 +77,6 @@ static int init_server(nanompi_communicator_t *comm) {
         goto close;
     }
 
-
     for (i = rank - 1; i >= 0; i--) {
         // Here "address" is a wildcard--meaning accept a connection from any address. However,
         // since connect/accept is blocking and we "connect" to the next higher/lower rank, we fill
