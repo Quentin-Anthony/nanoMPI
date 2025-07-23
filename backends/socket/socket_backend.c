@@ -32,12 +32,14 @@ static int init_server(nanompi_communicator_t *comm) {
     }
 
     // Try to reuse addr and port to avoid pesky bind: address in use errors >:(
-    // This is especially useful right now because the job launcher does not forward Ctrl+C signals
-    // to each process. That means after every run that errors or is Ctrl+C'd out, we get more stray
-    // processes
-    // TODO: It seems like this doesn't always work
-    if (setsockopt(comm->socket_info.server_fd, SOL_SOCKET, SO_REUSEADDR | SO_REUSEPORT, &opt,
-                   sizeof(opt))) {
+    // This is especially useful right now because the job launcher does not forward Ctrl+C signals to each process.
+    // That means after every run that errors or is Ctrl+C'd out, we get more stray processes
+    int so = SO_REUSEADDR;
+#ifndef __APPLE__
+    // This option does not work on my (Nick's) mac
+    so |= SO_REUSEPORT;
+#endif
+    if (setsockopt(comm->socket_info.server_fd, SOL_SOCKET, so, &opt, sizeof(opt))) {
         perror("setsockopt");
         status = MPI_ERR_OTHER;
         goto close;
@@ -81,7 +83,6 @@ static int init_server(nanompi_communicator_t *comm) {
         // out client_fds in rank order e.g. ranks are 0 1 2 0 connects to 1 and blocks 1 connects
         // to 2 and blocks 2 accepts 1, unblocking 1. 1 is in rank order in 2's client_fds 2 accepts
         // 0, 0 is in rank order in 2's client_fds 1 accepts 0, 0 is in rank order in 1's client_fds
-        // TODO: is this explanation necessary?
         comm->socket_info.client_fds[i] =
             accept(comm->socket_info.server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen);
     }
