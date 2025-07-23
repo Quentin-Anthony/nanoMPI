@@ -39,9 +39,7 @@ static int init_server(nanompi_communicator_t *comm) {
     // This option does not work on my (Nick's) mac
     so |= SO_REUSEPORT;
 #endif
-    if (setsockopt(comm->socket_info.server_fd, SOL_SOCKET,
-                   so, &opt,
-                   sizeof(opt))) {
+    if (setsockopt(comm->socket_info.server_fd, SOL_SOCKET, so, &opt, sizeof(opt))) {
         perror("setsockopt");
         status = MPI_ERR_OTHER;
         goto close;
